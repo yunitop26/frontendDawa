@@ -1,0 +1,119 @@
+<div class="file-uploader">
+    <!-- Vista para un solo archivo -->
+    <ng-container *ngIf="view === 'single'; else multipleView">
+        @if (label) {
+            <label class="block text-sm font-medium text-gray-800 mb-2">
+                {{label}}
+                <span *ngIf="required" class="text-red-500">*</span>
+            </label>
+        }
+        <div class="relative flex w-full border border-gray-300 rounded-lg overflow-hidden shadow-sm dark:border-primary-dark-mode dark:bg-primary-dark">
+            <!-- Botón de carga -->
+            <button type="button" class="h-full px-4 py-3 bg-gray-100 text-gray-700 dark:bg-primary-dark-mode dark:text-gray-300"
+                    (click)="triggerFileInput('file-input-single')">
+        Escoge un archivo
+      </button>
+            <!-- Archivo seleccionado o mensaje de "sin seleccionar" -->
+            <span class="flex-1 px-4 py-3 overflow-hidden truncate text-gray-700 dark:text-gray-300"
+                  *ngIf="files.length; else noFileChosen">
+        {{ files[0]?.name }}
+      </span>
+            <ng-template #noFileChosen>
+        <span class="flex-1 px-4 py-3 text-gray-400 dark:text-primarytx-dark-2">
+          Ningún archivo seleccionado
+        </span>
+            </ng-template>
+            <!-- Input oculto para cargar el archivo -->
+            <input
+                    type="file"
+                    id="file-input-single"
+                    class="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                    (change)="handleFileInput($event)"
+                    [attr.required]="required ? '' : null"
+            />
+        </div>
+
+        <!-- Barra de progreso -->
+        <div *ngIf="isValidProgressForFirstFile()" class="mt-2">
+            <div class="h-2 relative w-full bg-gray-200 rounded">
+                <div
+                        class="absolute top-0 left-0 h-full bg-blue-500 rounded transition-all"
+                        [style.width]="getProgressForFirstFile() + '%'">
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">
+                Subiendo archivo... {{ getProgressForFirstFile() }}%
+            </p>
+        </div>
+    </ng-container>
+
+    <!-- Vista para múltiples archivos -->
+    <ng-template #multipleView>
+        <label class="block text-sm font-medium text-gray-800 mb-2">
+            Selecciona tus archivos
+            <span *ngIf="required" class="text-red-500">*</span>
+        </label>
+        <!-- Caja de carga para múltiples archivos -->
+        <div
+                class="cursor-pointer p-12 flex justify-center bg-white border border-dashed border-gray-300
+                rounded-xl dark:bg-neutral-800 dark:border-neutral-600 mb-4"
+                (click)="triggerFileInput('file-input-multiple')"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)">
+
+
+            <input
+                    type="file"
+                    id="file-input-multiple"
+                    class="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                    [attr.multiple]="multiple ? '' : null"
+                    (change)="handleFileInput($event)"
+                    [attr.required]="required ? '' : null"
+            />
+
+            <div class="text-center">
+                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                    Arrastra tus archivos aquí o presiona para seleccionarlos.
+                </p>
+            </div>
+        </div>
+
+        <!-- Lista de archivos con barra de progreso -->
+        <ul class="space-y-3">
+            <li
+                    *ngFor="let file of files; let i = index"
+                    class="p-3 flex items-center justify-between bg-gray-100 rounded-lg border border-gray-300 dark:bg-neutral-800 dark:border-neutral-600"
+            >
+                <div class="truncate">
+                    <p class="text-sm text-gray-600 dark:text-neutral-300">
+                        {{ file.name }}
+                    </p>
+                    <p class="text-xs text-gray-400 dark:text-neutral-500">
+                        {{ (file.size / 1024 / 1024) | number: '1.2-2' }} MB
+                    </p>
+                </div>
+                <!-- Barra de progreso -->
+                <div *ngIf="files.length > 0 && progress[files[0]?.name || ''] !== undefined" class="mt-2">
+                    <div class="h-2 relative w-full bg-gray-200 rounded">
+                        <div
+                                class="absolute top-0 left-0 h-full bg-blue-500 rounded transition-all"
+                                [style.width]="(progress[files[0]?.name || ''] || 0) + '%'"
+                        ></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Subiendo archivo... {{ progress[files[0]?.name || ''] || 0 }}%
+                    </p>
+                </div>
+                <!-- Botón para quitar archivo -->
+                <button
+                        class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600"
+                        (click)="removeFile(i)"
+                        title="Quitar archivo"
+                >
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-square-rounded-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 2l.324 .001l.318 .004l.616 .017l.299 .013l.579 .034l.553 .046c4.785 .464 6.732 2.411 7.196 7.196l.046 .553l.034 .579c.005 .098 .01 .198 .013 .299l.017 .616l.005 .642l-.005 .642l-.017 .616l-.013 .299l-.034 .579l-.046 .553c-.464 4.785 -2.411 6.732 -7.196 7.196l-.553 .046l-.579 .034c-.098 .005 -.198 .01 -.299 .013l-.616 .017l-.642 .005l-.642 -.005l-.616 -.017l-.299 -.013l-.579 -.034l-.553 -.046c-4.785 -.464 -6.732 -2.411 -7.196 -7.196l-.046 -.553l-.034 -.579a28.058 28.058 0 0 1 -.013 -.299l-.017 -.616c-.003 -.21 -.005 -.424 -.005 -.642l.001 -.324l.004 -.318l.017 -.616l.013 -.299l.034 -.579l.046 -.553c.464 -4.785 2.411 -6.732 7.196 -7.196l.553 -.046l.579 -.034c.098 -.005 .198 -.01 .299 -.013l.616 -.017c.21 -.003 .424 -.005 .642 -.005zm-1.489 7.14a1 1 0 0 0 -1.218 1.567l1.292 1.293l-1.292 1.293l-.083 .094a1 1 0 0 0 1.497 1.32l1.293 -1.292l1.293 1.292l.094 .083a1 1 0 0 0 1.32 -1.497l-1.292 -1.293l1.292 -1.293l.083 -.094a1 1 0 0 0 -1.497 -1.32l-1.293 1.292l-1.293 -1.292l-.094 -.083z" fill="currentColor" stroke-width="0" /></svg>
+                </button>
+            </li>
+        </ul>
+    </ng-template>
+</div>

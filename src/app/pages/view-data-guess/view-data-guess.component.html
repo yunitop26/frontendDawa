@@ -1,0 +1,39 @@
+<div class="bg-white dark:bg-primary-dark dark:text-neutral-200 m-5 p-5 rounded-lg shadow-lg">
+    <div class="form-wrapper">
+        <h2 class="text-lg mb-1 text-gray-800 dark:text-neutral-200 font-bold">
+            Datos Guardados
+        </h2>
+        <p class="text-gray-600 dark:text-neutral-400 text-sm mb-6">
+            Visualización de datos exportados desde el sistema
+        </p>
+
+        <p-table
+                [value]="products"
+                [tableStyle]="{ 'min-width': '50rem' }"
+                [paginator]="true"
+                [rows]="5"
+                [rowsPerPageOptions]="[5, 10, 20]"
+        >
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>ID</th>
+                    <th>Estudiante</th>
+                    <th>Tutor</th>
+                    <th>Documento</th>
+                    <th>Nota</th>
+                    <th>Observación</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-product>
+                <tr>
+                    <td>{{ product.id }}</td>
+                    <td>{{ product.studentName }}</td>
+                    <td>{{ product.teacherName }}</td>
+                    <td>{{ product.documentName }}</td>
+                    <td>{{ product.note }}</td>
+                    <td>{{ product.observation }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
